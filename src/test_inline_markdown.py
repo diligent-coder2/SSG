@@ -4,7 +4,8 @@ from inline_markdown import (split_nodes_delimiter,
                             extract_markdown_images,
                             extract_markdown_links,
                             split_nodes_image,
-                            split_nodes_link
+                            split_nodes_link,
+                            text_to_textnodes
                             )
 
 class TestNodeSplitter(unittest.TestCase):
@@ -220,6 +221,41 @@ class TestSplitNodesLink(unittest.TestCase):
             ],
             new_nodes,
         )
+
+class TestTextToTextNodes(unittest.TestCase):
+    def test_text_to_textnodes(self):
+        text = "This is a **bold** word, an _italic_ word, a `code` word, an ![image](https://www.example.com/image.png) and a [link](https://www.example.com)"
+        nodes = text_to_textnodes(text)
+        expected_nodes = [
+            TextNode("This is a ", TextType.TEXT),
+            TextNode("bold", TextType.BOLD),
+            TextNode(" word, an ", TextType.TEXT),
+            TextNode("italic", TextType.ITALIC),
+            TextNode(" word, a ", TextType.TEXT),
+            TextNode("code", TextType.CODE),
+            TextNode(" word, an ", TextType.TEXT),
+            TextNode("image", TextType.IMAGE, url="https://www.example.com/image.png"),
+            TextNode(" and a ", TextType.TEXT),
+            TextNode("link", TextType.LINK, url="https://www.example.com"),
+        ]
+        self.assertEqual(nodes, expected_nodes)
+
+    def test_text_to_textnodes_no_markdown(self):   
+        text = "This is a plain text with no markdown."
+        nodes = text_to_textnodes(text)
+        expected_nodes = [TextNode("This is a plain text with no markdown.", TextType.TEXT)]
+        self.assertEqual(nodes, expected_nodes)
+
+    def test_text_to_textnodes_few_markdown(self):
+        text = "This is a **bold** word and an ![image](https://www.example.com/image.png)"
+        nodes = text_to_textnodes(text)
+        expected_nodes = [
+            TextNode("This is a ", TextType.TEXT),
+            TextNode("bold", TextType.BOLD),
+            TextNode(" word and an ", TextType.TEXT),
+            TextNode("image", TextType.IMAGE, url="https://www.example.com/image.png"),
+        ]
+        self.assertEqual(nodes, expected_nodes)
 
 if __name__ == "__main__":
     unittest.main()
