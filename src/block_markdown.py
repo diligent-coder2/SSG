@@ -44,3 +44,6 @@ def markdown_to_blocks(markdown):
         block = block.strip()
         filtered_blocks.append(block)
     return filtered_blocks
+
+def markdown_to_html_node(markdown):
+    pass
